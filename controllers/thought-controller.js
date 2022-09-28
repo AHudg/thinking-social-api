@@ -3,6 +3,7 @@ const { Thought, User } = require("../models");
 const thoughtController = {
   getThought(req, res) {
     Thought.find({})
+      .select("-__v")
       .then((dbThoughtData) => res.json(dbThoughtData))
       .catch((err) => {
         console.log(err);
@@ -12,6 +13,8 @@ const thoughtController = {
 
   getSpecificThought({ params }, res) {
     Thought.findOne({ _id: params.id })
+      .select("-__v")
+
       .then((dbThoughtData) => {
         if (!dbThoughtData) {
           res.send(404).json({ message: "No thought found by this id." });
@@ -27,7 +30,6 @@ const thoughtController = {
 
   addThought({ body }, res) {
     Thought.create(body)
-      // .then((dbThoughtData) => res.json(dbThoughtData))
       .then(({ username, _id }) => {
         return User.findOneAndUpdate(
           { username: username },
