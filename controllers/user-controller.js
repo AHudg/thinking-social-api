@@ -1,5 +1,5 @@
 const { response } = require("express");
-const { User } = require("../models");
+const { User, Thought } = require("../models");
 const { param } = require("../routes/api/user-routes");
 
 const userController = {
@@ -76,13 +76,14 @@ const userController = {
 
   deleteUser({ params }, res) {
     User.findByIdAndDelete({ _id: params.id })
-      .then((dbUserData) => {
-        if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
-          return;
-        }
-        res.json(dbUserData);
-      })
+      .then((dbUserData) =>
+        !dbUserData
+          ? res.status(404).json({ message: "No user found with this id." })
+          : Thought.deleteMany({ _id: { $in: dbUserData.thoughts } })
+      )
+      .then(() =>
+        res.json({ message: "User and associated thoughts deleted!" })
+      )
       .catch((err) => res.status(400).json(err));
   },
 
